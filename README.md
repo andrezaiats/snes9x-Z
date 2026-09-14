@@ -39,6 +39,14 @@ Every change here is validated bit-exact against the original, unmodified Snes9x
 
 **Baseline:** compared against unmodified upstream Snes9x at commit [`7a8878f1`](https://github.com/snes9xgit/snes9x/commit/7a8878f1306f65594c30b7d86dee41d972c2e495) (2026-09-04), bit-identical to `snes9xgit/snes9x`. No cherry-picked or aged comparison point.
 
+## Reproducing this yourself
+
+The benchmark tooling that produced the table above ships in [`bench/`](bench/), along with instructions for building the exact upstream commit to compare against. What doesn't ship is the ROM corpus: these are commercial games this project holds no license to, so beyond citing them by name above, nothing further about them (checksums, filenames, dumps) is published here. Point the tools at your own copies instead. [`bench/README.md`](bench/README.md) has the full walkthrough, including a checkpoint-hash diff that proves bit-exactness on your own ROM without needing any of ours.
+
+You won't match the table above ROM for ROM, and that's expected rather than a red flag: different dumps, different revisions, and whether the game is idle or actually being played all move the number, and the table above used scripted gameplay for only a few titles. What should generalize is the shape of the result: every title in this corpus gained, on both platforms, on every repetition, spread from +20.2% to +98.4%. A result well outside that band on your own hardware is worth a second look, not evidence the table is fabricated.
+
+One boundary worth stating plainly: most of the gain comes from the threaded renderer, and that needs a spare CPU core to pay off. On a single-core system it can cost more than it buys, which is why it ships as a toggle (`--core-option snes9x_threaded_render=disabled` in the bench tools, or the `Threaded Renderer` core option in RetroArch) rather than a hard-wired change. Turning it off doesn't give up everything this fork does: the single-threaded PPU/APU work underneath it (the redundant-work removal and the APU/DSP fixes from "What changed" above) measured a mean **+19.4% (x86-64) / +19.9% (arm64)** against the same upstream baseline on its own, before the render thread architecture existed at all.
+
 ## Why it matters
 
 More performance from the same hardware isn't just a bigger fps number. It's a resource you get to spend however you want:
@@ -91,13 +99,13 @@ Without it, RetroArch can still load the core manually (Load Core → browse to 
 
 ## License
 
-Non-commercial, personal use. See `LICENSE`. Same terms as upstream Snes9x, plus this fork's own copyright for the work described above.
+Non-commercial, personal use. See [`LICENSE`](LICENSE). Same terms as upstream Snes9x, plus this fork's own copyright for the work described above.
 
 ---
 
 **Methodology:** built with AI-assisted engineering, human-in-the-loop at every step, never an autonomous pipeline. Completed in 3 days. The orchestration and tooling behind this process are proprietary. Total cost: under $30 in LLM usage.
 
-Source is provided stripped of internal comments and process history. The results are bit-exact against upstream and the numbers above are reproducible. That's the proof, not an explanation of how it was built. Questions about the process are welcome, via interview.
+Source is provided stripped of internal comments and process history. The bit-exactness against upstream is independently verifiable with the included tools and your own ROMs, and the performance gain is reproducible the same way, though the exact numbers you get will depend on your dumps and your hardware (see "Reproducing this yourself" above). That's the proof, not an explanation of how it was built. Questions about the process are welcome, via interview.
 
 I specialize in deep-tech performance engineering, multi-core architecture, and applying AI-assisted engineering to legacy, compute-bound problems. Available for high-level architecture and infrastructure roles.
 
